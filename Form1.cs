@@ -2,17 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
 
 namespace PVRL
 {
     public partial class Form1 : Form
     {
-        private List<string> guns = new List<string>();
-        private int currentGunIndex = 0;
-        public int walletAmount = 0;
-        private int ammoCount = 0;
-        private int maxAmmo = 100;
+        public int walletAmount = 0; // Change this to public
+
         private Point playerPosition;
         private string[] mapLines;
         private string characterName;
@@ -46,7 +47,6 @@ namespace PVRL
             SetDoubleBuffered(inventoryPanel);
             SetDoubleBuffered(playerStatsPanel);
             LoadCharacterData();
-            LoadGuns();
             UpdateWalletDisplay();
             InitializeSkillTree();
             InitializePlayerStats();
@@ -117,7 +117,7 @@ namespace PVRL
                         }
                     }
                 }
-                playerHealth = CharacterStrength * 10; // Example calculation for player health
+                playerHealth = 100; // Base health for player
             }
             else
             {
@@ -143,18 +143,44 @@ namespace PVRL
             }
         }
 
-        private void LoadGuns()
+        public void StartServer(int port, string playerSheet)
         {
-            string filePath = @"E:\Projectvara\Generation engines\Vara_engine\Generated_files\Guns.txt";
+            // Create a TcpListener to start listening for incoming connection requests.
+            TcpListener server = new TcpListener(IPAddress.Any, port);
+            server.Start();
 
-            if (File.Exists(filePath))
+            // Use a new thread to handle incoming connection requests.
+            Thread serverThread = new Thread(() =>
             {
-                guns = new List<string>(File.ReadAllText(filePath).Split(new[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries));
-            }
-            else
-            {
-                MessageBox.Show($"Failed to load guns: {filePath} not found");
-            }
+                try
+                {
+                    while (true)
+                    {
+                        TcpClient client = server.AcceptTcpClient();
+                        // Handle the connected client in a new thread.
+                        Thread clientThread = new Thread(() => HandleClient(client));
+                        clientThread.Start();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Server encountered an error: {ex.Message}");
+                }
+                finally
+                {
+                    server.Stop();
+                }
+            });
+
+            serverThread.IsBackground = true; // Ensure the thread will not prevent the application from exiting.
+            serverThread.Start();
+        }
+
+        private void HandleClient(TcpClient client)
+        {
+            // Handle the connected client here.
+            // For now, we just close the connection.
+            client.Close();
         }
 
         private void LoadDungeon()
@@ -314,50 +340,14 @@ namespace PVRL
             }
         }
 
-        private void LoadGunButton_Click(object sender, EventArgs e)
+        private void InventoryListBox_DoubleClick(object sender, EventArgs e)
         {
-            if (currentGunIndex < guns.Count)
+            if (inventoryListBox.SelectedItem != null)
             {
-                string gun = guns[currentGunIndex];
-                string gunId = GetGunId(gun);
-                Button gunButton = new Button
-                {
-                    Text = gunId,
-                    AutoSize = true,
-                    Tag = gun,
-                    Location = new Point(10, currentGunIndex * 30) // Adjust the vertical position
-                };
-                gunButton.MouseDown += InventorySlot_MouseDown; // Enable drag functionality
-                // gunToolTip.SetToolTip(gunButton, gun.Replace("\r\n", "\n")); // Set the tooltip text
-                //AddToInventory(gunButton);
-                currentGunIndex++;
+                string selectedItem = inventoryListBox.SelectedItem.ToString();
+                equippedWeapon = selectedItem;
+                equippedWeaponLabel.Text = $"Weapon: {selectedItem}";
             }
-            else
-            {
-                MessageBox.Show("All guns have been loaded.");
-            }
-        }
-
-        private void GunButton_Click(object sender, EventArgs e)
-        {
-            if (sender is Button gunButton && gunButton.Tag is string gunInfo)
-            {
-                equippedWeapon = gunInfo;
-                MessageBox.Show($"Equipped {GetGunId(gunInfo)}", "Weapon Equipped");
-            }
-        }
-
-        private string GetGunId(string gunInfo)
-        {
-            using (StringReader reader = new StringReader(gunInfo))
-            {
-                string line = reader.ReadLine();
-                if (line != null && line.StartsWith("ID:"))
-                {
-                    return line.Substring(4).Trim();
-                }
-            }
-            return "Unknown ID";
         }
 
         public void UpdateWalletDisplay()
@@ -487,11 +477,11 @@ namespace PVRL
             if (random.Next(100) < accuracy)
             {
                 currentEnemy.Health -= damage;
-                MessageBox.Show($"You attacked the enemy and dealt {damage} damage!");
+                combatLogTextBox.AppendText($"You attacked the enemy and dealt {damage} damage!\n");
 
                 if (currentEnemy.Health <= 0)
                 {
-                    MessageBox.Show("You defeated the enemy!");
+                    combatLogTextBox.AppendText("You defeated the enemy!\n");
                     enemies.Remove(currentEnemy);
                     EndCombat();
                     GainExperience();
@@ -503,51 +493,44 @@ namespace PVRL
             }
             else
             {
-                MessageBox.Show("You missed!");
+                combatLogTextBox.AppendText("You missed!\n");
                 EnemyAttack();
             }
         }
 
         private int ParseStatFromEquippedWeapon(string statName)
         {
-            using (StringReader reader = new StringReader(equippedWeapon))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.StartsWith(statName + ":"))
-                    {
-                        return int.Parse(line.Substring(statName.Length + 1).Trim());
-                    }
-                }
-            }
-            return 0;
+            // Example implementation for parsing weapon stats
+            // Placeholder implementation; replace with actual logic
+            return 10; // Replace with actual stat value from the equipped weapon
         }
 
         private void EnemyAttack()
         {
             int enemyDamage = currentEnemy.Damage;
             playerHealth -= enemyDamage;
-            MessageBox.Show($"Enemy attacked you and dealt {enemyDamage} damage!");
+            combatLogTextBox.AppendText($"Enemy attacked you and dealt {enemyDamage} damage!\n");
 
             if (playerHealth <= 0)
             {
-                MessageBox.Show("You were defeated!");
+                combatLogTextBox.AppendText("You were defeated!\n");
                 // Handle player defeat (e.g., game over or respawn)
             }
+
+            healthBar.Value = Math.Max(0, playerHealth); // Update health bar dynamically
         }
 
         private void GainExperience()
         {
             int experienceGained = 50; // Example experience gain
             ExperiencePoints += experienceGained;
-            MessageBox.Show($"You gained {experienceGained} experience points!");
+            combatLogTextBox.AppendText($"You gained {experienceGained} experience points!\n");
 
             if (ExperiencePoints >= PlayerLevel * 100) // Example level-up condition
             {
                 ExperiencePoints -= PlayerLevel * 100;
                 PlayerLevel++;
-                MessageBox.Show("You leveled up!");
+                combatLogTextBox.AppendText("You leveled up!\n");
                 SaveCharacterData();
                 InitializePlayerStats();
             }
@@ -564,31 +547,19 @@ namespace PVRL
 
         private void EnterDungeonButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Entering dungeon...");
+            combatLogTextBox.AppendText("Entering dungeon...\n");
             LoadDungeon();
         }
 
         private void ShopButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Opening shop...");
+            combatLogTextBox.AppendText("Opening shop...\n");
             // Logic for opening shop can be implemented here
         }
 
         private void ReceiveQuestButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Receiving quest...");
-            // Logic for receiving quest can be implemented here
-        }
-
-        private void ShowShop()
-        {
-            MessageBox.Show("Opening shop...");
-            // Logic for opening shop can be implemented here
-        }
-
-        private void ShowQuestGiver()
-        {
-            MessageBox.Show("Receiving quest...");
+            combatLogTextBox.AppendText("Receiving quest...\n");
             // Logic for receiving quest can be implemented here
         }
 
@@ -599,14 +570,14 @@ namespace PVRL
 
         private void InitiateCombat()
         {
-            MessageBox.Show("Combat initiated with an enemy!");
+            combatLogTextBox.AppendText("Combat initiated with an enemy!\n");
             fightButton.Visible = true;
             fleeButton.Visible = true;
             itemButton.Visible = false;
             bargainButton.Visible = false;
 
             healthBar.Visible = true;
-            healthBar.Maximum = CharacterStrength * 10; // Example calculation for maximum health
+            healthBar.Maximum = 100; // Example calculation for maximum health
             healthBar.Value = Math.Max(0, playerHealth);
 
             mapPanel.Invalidate(); // Redraw the map with combat UI
@@ -629,6 +600,33 @@ namespace PVRL
         }
 
         private void armsSlot_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void InventoryListBox_MouseHover(object sender, EventArgs e)
+        {
+            Point mousePosition = inventoryListBox.PointToClient(Control.MousePosition);
+            int index = inventoryListBox.IndexFromPoint(mousePosition);
+            if (index >= 0 && index < inventoryListBox.Items.Count)
+            {
+                string selectedItem = inventoryListBox.Items[index].ToString();
+                //gunToolTip.SetToolTip(inventoryListBox, selectedItem); // Display selected item as tooltip
+            }
+        }
+
+        private void ReturnToMainMenuButton_Click(object sender, EventArgs e)
+        {
+            // Save character data before returning to main menu
+            SaveCharacterData();
+
+            // Return to main menu
+            MainMenu mainMenu = new MainMenu();
+            mainMenu.Show();
+            this.Close();
+        }
+
+        private void inventoryListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }

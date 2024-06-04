@@ -11,24 +11,25 @@
         private Button bargainButton;
         private ProgressBar healthBar;
         private Button skillsButton;
-        private Button loadGunButton;
         private Label walletLabel;
-        private ToolTip gunToolTip;
         private Panel playerStatsPanel;
         private Button enterDungeonButton;
         private Button shopButton;
         private Button receiveQuestButton;
+        private Panel equipmentPanel;
+        private TextBox combatLogTextBox;
+        private Button returnToMainMenuButton; // Add the button
 
-        // Gear slots
-        private Button helmetSlot;
-        private Button chestSlot;
-        private Button legsSlot;
-        private Button armsSlot;
-        private Button backSlot;
-        private Panel stickFigurePanel;
+        // Gear labels
+        private Label helmetLabel;
+        private Label chestLabel;
+        private Label legsLabel;
+        private Label armsLabel;
+        private Label backLabel;
+        private Label equippedWeaponLabel;
 
         // General inventory slots
-        private Button[] inventorySlots;
+        private ListBox inventoryListBox;
 
         protected override void Dispose(bool disposing)
         {
@@ -44,25 +45,29 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             mapPanel = new DoubleBufferedPanel();
             inventoryPanel = new Panel();
-            helmetSlot = new Button();
-            chestSlot = new Button();
-            legsSlot = new Button();
-            armsSlot = new Button();
-            backSlot = new Button();
-            stickFigurePanel = new Panel();
+            inventoryListBox = new ListBox();
+            equipmentPanel = new Panel();
+            helmetLabel = new Label();
+            chestLabel = new Label();
+            legsLabel = new Label();
+            armsLabel = new Label();
+            backLabel = new Label();
+            equippedWeaponLabel = new Label();
+            combatLogTextBox = new TextBox();
             fightButton = new Button();
             itemButton = new Button();
             fleeButton = new Button();
             bargainButton = new Button();
             healthBar = new ProgressBar();
             skillsButton = new Button();
-            loadGunButton = new Button();
             walletLabel = new Label();
             playerStatsPanel = new Panel();
             enterDungeonButton = new Button();
             shopButton = new Button();
             receiveQuestButton = new Button();
-            stickFigurePanel.SuspendLayout();
+            returnToMainMenuButton = new Button();
+            inventoryPanel.SuspendLayout();
+            equipmentPanel.SuspendLayout();
             SuspendLayout();
             // 
             // mapPanel
@@ -77,97 +82,104 @@
             // 
             // inventoryPanel
             // 
-            inventoryPanel.AutoScroll = true;
             inventoryPanel.BackColor = SystemColors.ControlLight;
             inventoryPanel.BorderStyle = BorderStyle.FixedSingle;
+            inventoryPanel.Controls.Add(inventoryListBox);
             inventoryPanel.Location = new Point(12, 248);
             inventoryPanel.Name = "inventoryPanel";
-            inventoryPanel.Size = new Size(160, 327);
+            inventoryPanel.Size = new Size(160, 336);
             inventoryPanel.TabIndex = 1;
             // 
-            // helmetSlot
+            // inventoryListBox
             // 
-            helmetSlot.AllowDrop = true;
-            helmetSlot.Location = new Point(55, 14);
-            helmetSlot.Name = "helmetSlot";
-            helmetSlot.Size = new Size(50, 38);
-            helmetSlot.TabIndex = 0;
-            helmetSlot.Text = "Helmet";
-            helmetSlot.DragDrop += GearSlot_DragDrop;
-            helmetSlot.DragEnter += GearSlot_DragEnter;
-            helmetSlot.MouseDown += GearSlot_MouseDown;
+            inventoryListBox.ItemHeight = 15;
+            inventoryListBox.Location = new Point(10, 10);
+            inventoryListBox.Name = "inventoryListBox";
+            inventoryListBox.Size = new Size(140, 289);
+            inventoryListBox.TabIndex = 0;
+            inventoryListBox.SelectedIndexChanged += inventoryListBox_SelectedIndexChanged;
+            inventoryListBox.DoubleClick += InventoryListBox_DoubleClick;
+            inventoryListBox.MouseHover += InventoryListBox_MouseHover;
             // 
-            // chestSlot
+            // equipmentPanel
             // 
-            chestSlot.AllowDrop = true;
-            chestSlot.Location = new Point(55, 71);
-            chestSlot.Name = "chestSlot";
-            chestSlot.Size = new Size(50, 38);
-            chestSlot.TabIndex = 1;
-            chestSlot.Text = "Chest";
-            chestSlot.Click += chestSlot_Click;
-            chestSlot.DragDrop += GearSlot_DragDrop;
-            chestSlot.DragEnter += GearSlot_DragEnter;
-            chestSlot.MouseDown += GearSlot_MouseDown;
+            equipmentPanel.BackColor = SystemColors.ControlLight;
+            equipmentPanel.BorderStyle = BorderStyle.FixedSingle;
+            equipmentPanel.Controls.Add(helmetLabel);
+            equipmentPanel.Controls.Add(chestLabel);
+            equipmentPanel.Controls.Add(legsLabel);
+            equipmentPanel.Controls.Add(armsLabel);
+            equipmentPanel.Controls.Add(backLabel);
+            equipmentPanel.Controls.Add(equippedWeaponLabel);
+            equipmentPanel.Location = new Point(12, 12);
+            equipmentPanel.Name = "equipmentPanel";
+            equipmentPanel.Size = new Size(160, 230);
+            equipmentPanel.TabIndex = 18;
             // 
-            // legsSlot
+            // helmetLabel
             // 
-            legsSlot.AllowDrop = true;
-            legsSlot.Location = new Point(55, 121);
-            legsSlot.Name = "legsSlot";
-            legsSlot.Size = new Size(50, 36);
-            legsSlot.TabIndex = 2;
-            legsSlot.Text = "Legs";
-            legsSlot.DragDrop += GearSlot_DragDrop;
-            legsSlot.DragEnter += GearSlot_DragEnter;
-            legsSlot.MouseDown += GearSlot_MouseDown;
+            helmetLabel.Location = new Point(10, 10);
+            helmetLabel.Name = "helmetLabel";
+            helmetLabel.Size = new Size(140, 30);
+            helmetLabel.TabIndex = 0;
+            helmetLabel.Text = "Helmet: None";
             // 
-            // armsSlot
+            // chestLabel
             // 
-            armsSlot.AllowDrop = true;
-            armsSlot.Location = new Point(3, 79);
-            armsSlot.Name = "armsSlot";
-            armsSlot.Size = new Size(50, 36);
-            armsSlot.TabIndex = 3;
-            armsSlot.Text = "Arms";
-            armsSlot.Click += armsSlot_Click;
-            armsSlot.DragDrop += GearSlot_DragDrop;
-            armsSlot.DragEnter += GearSlot_DragEnter;
-            armsSlot.MouseDown += GearSlot_MouseDown;
+            chestLabel.Location = new Point(10, 50);
+            chestLabel.Name = "chestLabel";
+            chestLabel.Size = new Size(140, 30);
+            chestLabel.TabIndex = 1;
+            chestLabel.Text = "Chest: None";
             // 
-            // backSlot
+            // legsLabel
             // 
-            backSlot.AllowDrop = true;
-            backSlot.Location = new Point(105, 79);
-            backSlot.Name = "backSlot";
-            backSlot.Size = new Size(50, 36);
-            backSlot.TabIndex = 4;
-            backSlot.Text = "Back";
-            backSlot.DragDrop += GearSlot_DragDrop;
-            backSlot.DragEnter += GearSlot_DragEnter;
-            backSlot.MouseDown += GearSlot_MouseDown;
+            legsLabel.Location = new Point(10, 90);
+            legsLabel.Name = "legsLabel";
+            legsLabel.Size = new Size(140, 30);
+            legsLabel.TabIndex = 2;
+            legsLabel.Text = "Legs: None";
             // 
-            // stickFigurePanel
+            // armsLabel
             // 
-            stickFigurePanel.BackColor = SystemColors.ControlLight;
-            stickFigurePanel.BorderStyle = BorderStyle.FixedSingle;
-            stickFigurePanel.Controls.Add(helmetSlot);
-            stickFigurePanel.Controls.Add(chestSlot);
-            stickFigurePanel.Controls.Add(legsSlot);
-            stickFigurePanel.Controls.Add(armsSlot);
-            stickFigurePanel.Controls.Add(backSlot);
-            stickFigurePanel.Location = new Point(12, 12);
-            stickFigurePanel.Name = "stickFigurePanel";
-            stickFigurePanel.Size = new Size(160, 230);
-            stickFigurePanel.TabIndex = 18;
-            stickFigurePanel.Paint += StickFigurePanel_Paint;
+            armsLabel.Location = new Point(10, 130);
+            armsLabel.Name = "armsLabel";
+            armsLabel.Size = new Size(140, 30);
+            armsLabel.TabIndex = 3;
+            armsLabel.Text = "Arms: None";
+            // 
+            // backLabel
+            // 
+            backLabel.Location = new Point(10, 170);
+            backLabel.Name = "backLabel";
+            backLabel.Size = new Size(140, 30);
+            backLabel.TabIndex = 4;
+            backLabel.Text = "Back: None";
+            // 
+            // equippedWeaponLabel
+            // 
+            equippedWeaponLabel.Location = new Point(10, 210);
+            equippedWeaponLabel.Name = "equippedWeaponLabel";
+            equippedWeaponLabel.Size = new Size(140, 30);
+            equippedWeaponLabel.TabIndex = 5;
+            equippedWeaponLabel.Text = "Weapon: None";
+            // 
+            // combatLogTextBox
+            // 
+            combatLogTextBox.Location = new Point(178, 426);
+            combatLogTextBox.Multiline = true;
+            combatLogTextBox.Name = "combatLogTextBox";
+            combatLogTextBox.ReadOnly = true;
+            combatLogTextBox.ScrollBars = ScrollBars.Vertical;
+            combatLogTextBox.Size = new Size(410, 158);
+            combatLogTextBox.TabIndex = 23;
             // 
             // fightButton
             // 
             fightButton.BackColor = SystemColors.ControlLight;
             fightButton.Location = new Point(178, 264);
             fightButton.Name = "fightButton";
-            fightButton.Size = new Size(120, 30);
+            fightButton.Size = new Size(91, 30);
             fightButton.TabIndex = 2;
             fightButton.Text = "Fight";
             fightButton.UseVisualStyleBackColor = false;
@@ -178,7 +190,7 @@
             itemButton.BackColor = SystemColors.ControlLight;
             itemButton.Location = new Point(178, 228);
             itemButton.Name = "itemButton";
-            itemButton.Size = new Size(120, 30);
+            itemButton.Size = new Size(91, 30);
             itemButton.TabIndex = 3;
             itemButton.Text = "Item";
             itemButton.UseVisualStyleBackColor = false;
@@ -187,9 +199,9 @@
             // fleeButton
             // 
             fleeButton.BackColor = SystemColors.ControlLight;
-            fleeButton.Location = new Point(303, 264);
+            fleeButton.Location = new Point(275, 264);
             fleeButton.Name = "fleeButton";
-            fleeButton.Size = new Size(120, 30);
+            fleeButton.Size = new Size(91, 30);
             fleeButton.TabIndex = 4;
             fleeButton.Text = "Flee";
             fleeButton.UseVisualStyleBackColor = false;
@@ -197,9 +209,9 @@
             // bargainButton
             // 
             bargainButton.BackColor = SystemColors.ControlLight;
-            bargainButton.Location = new Point(303, 228);
+            bargainButton.Location = new Point(275, 228);
             bargainButton.Name = "bargainButton";
-            bargainButton.Size = new Size(120, 30);
+            bargainButton.Size = new Size(91, 30);
             bargainButton.TabIndex = 5;
             bargainButton.Text = "Bargain";
             bargainButton.UseVisualStyleBackColor = false;
@@ -215,24 +227,13 @@
             // skillsButton
             // 
             skillsButton.BackColor = SystemColors.ControlLight;
-            skillsButton.Location = new Point(429, 228);
+            skillsButton.Location = new Point(372, 228);
             skillsButton.Name = "skillsButton";
-            skillsButton.Size = new Size(120, 30);
+            skillsButton.Size = new Size(91, 30);
             skillsButton.TabIndex = 7;
             skillsButton.Text = "Skills";
             skillsButton.UseVisualStyleBackColor = false;
             skillsButton.Click += skillsButton_Click;
-            // 
-            // loadGunButton
-            // 
-            loadGunButton.BackColor = SystemColors.ControlLight;
-            loadGunButton.Location = new Point(429, 264);
-            loadGunButton.Name = "loadGunButton";
-            loadGunButton.Size = new Size(120, 30);
-            loadGunButton.TabIndex = 9;
-            loadGunButton.Text = "Load Gun";
-            loadGunButton.UseVisualStyleBackColor = false;
-            loadGunButton.Click += LoadGunButton_Click;
             // 
             // walletLabel
             // 
@@ -240,7 +241,7 @@
             walletLabel.BackColor = Color.Transparent;
             walletLabel.BorderStyle = BorderStyle.FixedSingle;
             walletLabel.ForeColor = SystemColors.ButtonFace;
-            walletLabel.Location = new Point(500, 344);
+            walletLabel.Location = new Point(734, 602);
             walletLabel.Name = "walletLabel";
             walletLabel.Size = new Size(60, 17);
             walletLabel.TabIndex = 14;
@@ -261,7 +262,7 @@
             // enterDungeonButton
             // 
             enterDungeonButton.BackColor = SystemColors.ControlLight;
-            enterDungeonButton.Location = new Point(178, 336);
+            enterDungeonButton.Location = new Point(468, 228);
             enterDungeonButton.Name = "enterDungeonButton";
             enterDungeonButton.Size = new Size(120, 30);
             enterDungeonButton.TabIndex = 20;
@@ -272,7 +273,7 @@
             // shopButton
             // 
             shopButton.BackColor = SystemColors.ControlLight;
-            shopButton.Location = new Point(304, 336);
+            shopButton.Location = new Point(468, 264);
             shopButton.Name = "shopButton";
             shopButton.Size = new Size(120, 30);
             shopButton.TabIndex = 21;
@@ -283,7 +284,7 @@
             // receiveQuestButton
             // 
             receiveQuestButton.BackColor = SystemColors.ControlLight;
-            receiveQuestButton.Location = new Point(178, 372);
+            receiveQuestButton.Location = new Point(594, 589);
             receiveQuestButton.Name = "receiveQuestButton";
             receiveQuestButton.Size = new Size(120, 30);
             receiveQuestButton.TabIndex = 22;
@@ -291,21 +292,33 @@
             receiveQuestButton.UseVisualStyleBackColor = false;
             receiveQuestButton.Click += ReceiveQuestButton_Click;
             // 
+            // returnToMainMenuButton
+            // 
+            returnToMainMenuButton.BackColor = SystemColors.ControlLight;
+            returnToMainMenuButton.Location = new Point(372, 264);
+            returnToMainMenuButton.Name = "returnToMainMenuButton";
+            returnToMainMenuButton.Size = new Size(90, 30);
+            returnToMainMenuButton.TabIndex = 24;
+            returnToMainMenuButton.Text = "Main Menu";
+            returnToMainMenuButton.UseVisualStyleBackColor = false;
+            returnToMainMenuButton.Click += ReturnToMainMenuButton_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ButtonHighlight;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
-            ClientSize = new Size(858, 596);
-            Controls.Add(stickFigurePanel);
+            ClientSize = new Size(921, 722);
+            Controls.Add(returnToMainMenuButton);
+            Controls.Add(combatLogTextBox);
+            Controls.Add(equipmentPanel);
             Controls.Add(inventoryPanel);
             Controls.Add(receiveQuestButton);
             Controls.Add(shopButton);
             Controls.Add(enterDungeonButton);
             Controls.Add(playerStatsPanel);
             Controls.Add(walletLabel);
-            Controls.Add(loadGunButton);
             Controls.Add(skillsButton);
             Controls.Add(healthBar);
             Controls.Add(bargainButton);
@@ -317,104 +330,10 @@
             Text = "PVRL";
             WindowState = FormWindowState.Maximized;
             Load += Form1_Load;
-            stickFigurePanel.ResumeLayout(false);
+            inventoryPanel.ResumeLayout(false);
+            equipmentPanel.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
-        }
-
-        private void StickFigurePanel_Paint(object sender, PaintEventArgs e)
-        {
-            // Draw a stick figure
-            using (Pen pen = new Pen(Color.Black, 2))
-            {
-                // Head
-                e.Graphics.DrawEllipse(pen, 55, 10, 50, 50);
-                // Body
-                e.Graphics.DrawLine(pen, 80, 60, 80, 140);
-                // Arms
-                e.Graphics.DrawLine(pen, 30, 80, 130, 80);
-                // Legs
-                e.Graphics.DrawLine(pen, 80, 140, 50, 200);
-                e.Graphics.DrawLine(pen, 80, 140, 110, 200);
-            }
-        }
-
-        private void InventorySlot_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (sender is Button button && button.Tag != null)
-            {
-                button.DoDragDrop(button, DragDropEffects.Move);
-            }
-        }
-
-        private void InventorySlot_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(typeof(Button)))
-            {
-                e.Effect = DragDropEffects.Move;
-            }
-        }
-
-        private void InventorySlot_DragDrop(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(typeof(Button)))
-            {
-                Button draggedButton = (Button)e.Data.GetData(typeof(Button));
-                Button targetButton = (Button)sender;
-
-                // Swap items between slots
-                object tempTag = targetButton.Tag;
-                targetButton.Tag = draggedButton.Tag;
-                draggedButton.Tag = tempTag;
-
-                string tempText = targetButton.Text;
-                targetButton.Text = draggedButton.Text;
-                draggedButton.Text = tempText;
-            }
-        }
-
-        private void GearSlot_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (sender is Button button && button.Tag != null)
-            {
-                button.DoDragDrop(button, DragDropEffects.Move);
-            }
-        }
-
-        private void GearSlot_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(typeof(Button)))
-            {
-                e.Effect = DragDropEffects.Move;
-            }
-        }
-
-        private void GearSlot_DragDrop(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(typeof(Button)))
-            {
-                Button draggedButton = (Button)e.Data.GetData(typeof(Button));
-                Button targetButton = (Button)sender;
-
-                // Move item to gear slot
-                targetButton.Tag = draggedButton.Tag;
-                targetButton.Text = draggedButton.Text;
-                draggedButton.Tag = null;
-                draggedButton.Text = "";
-            }
-        }
-
-        private void AddToInventory(Button itemButton)
-        {
-            for (int i = 0; i < inventorySlots.Length; i++)
-            {
-                if (inventorySlots[i].Tag == null)
-                {
-                    inventorySlots[i].Tag = itemButton.Tag;
-                    inventorySlots[i].Text = itemButton.Text;
-                    break;
-                }
-            }
         }
     }
 }

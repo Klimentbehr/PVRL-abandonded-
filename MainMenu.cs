@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Windows.Forms;
 
 namespace PVRL
@@ -31,17 +30,23 @@ namespace PVRL
 
                 if (savedCharacters.Count > 0)
                 {
+                    pveButton.Enabled = true;
                     joinGameButton.Enabled = true;
+                    hostGameButton.Enabled = true;
                 }
                 else
                 {
+                    pveButton.Enabled = false;
                     joinGameButton.Enabled = false;
+                    hostGameButton.Enabled = false;
                 }
             }
             else
             {
                 Directory.CreateDirectory(savesPath);
+                pveButton.Enabled = false;
                 joinGameButton.Enabled = false;
+                hostGameButton.Enabled = false;
             }
         }
 
@@ -58,6 +63,16 @@ namespace PVRL
         }
 
         private void JoinGameButton_Click(object sender, EventArgs e)
+        {
+            // Placeholder for future join game logic
+        }
+
+        private void HostGameButton_Click(object sender, EventArgs e)
+        {
+            // Placeholder for future host game logic
+        }
+
+        private void PveButton_Click(object sender, EventArgs e)
         {
             // Check if there are saved characters
             if (savedCharacters.Count > 0)
